@@ -246,7 +246,7 @@ DataTree = function(params, subTreeRequest) {
 
 		//do callback on click to actual nodes? Pass LI, LI's xPath and event obj.
 		if (params.clickCallback)
-			this.tree.on('.LIText', 'click', function(evt) {
+			this.tree.on('click', '.LIText', function(evt) {
 				let li = $(this).closest('li'); params.clickCallback(li, returnXPathToNode(li), evt);
 			});
 
