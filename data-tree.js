@@ -461,6 +461,7 @@ DataTree = function(params, subTreeRequest) {
 				let index = $(this).prevAll().filter(function() { return $(this).children('.LIText').children('.node').text() == nodeName; }).length + 1;
 				if (index > 1) step += '['+index+']'
 				path.push(step);
+			});
 		}
 		return path.join('/');
 	}
