@@ -292,28 +292,54 @@ DataTree = function(params, subTreeRequest) {
 
 		//...get data...
 		let dataType = !params.jsonp ? (!params.json || typeof params.json == 'object' ? 'xml' : 'json') : 'jsonp';
-		$.ajax({
-			url: params.fpath,
-			type: !params.post ? 'GET' : 'POST',
-			data: params.req_data,
-			cache: params.cache == undefined ? true : params.cache,
-			dataType: dataType
-		})
-			.error(function() { debug('could not load XML from '+params.fpath); })
+		var jquery_ver = parseInt($.fn.jquery.split('.')[0])
+		if (jquery_ver >= 3) {
+			$.ajax({
+				url: params.fpath,
+				type: !params.post ? 'GET' : 'POST',
+				data: params.req_data,
+				cache: params.cache == undefined ? true : params.cache,
+				dataType: dataType
+			})
+				.fail(function() { debug('could not load XML from '+params.fpath); })
+	
+				//...success. Establish XML. If params.json, convert JSON respone to XML text then reinitialise
+				.done(function(data) {
+					if (params.json && typeof params.json != 'object') {
+						if (params.jsonCallback) data = params.jsonCallback(data);
+						delete params.fpath;
+						params.xml = json_to_xml(data);
+						return new DataTree(params, subTreeRequest);
+					}
+					if (params.jsonp) data = decodeURIComponent(data).replace(/\{space\}/g, ' ');
+					thiss.xml = data;
+					actOnXML.call(thiss, data, !!subTreeRequest);
+					treeRenderedDfd.resolve();
+				});
+		} else {
+			$.ajax({
+				url: params.fpath,
+				type: !params.post ? 'GET' : 'POST',
+				data: params.req_data,
+				cache: params.cache == undefined ? true : params.cache,
+				dataType: dataType
+			})
+				.error(function() { debug('could not load XML from '+params.fpath); })
 
-			//...success. Establish XML. If params.json, convert JSON respone to XML text then reinitialise
-			.done(function(data) {
-				if (params.json && typeof params.json != 'object') {
-					if (params.jsonCallback) data = params.jsonCallback(data);
-					delete params.fpath;
-					params.xml = json_to_xml(data);
-					return new DataTree(params, subTreeRequest);
-				}
-				if (params.jsonp) data = decodeURIComponent(data).replace(/\{space\}/g, ' ');
-				thiss.xml = data;
-				actOnXML.call(thiss, data, !!subTreeRequest);
-				treeRenderedDfd.resolve();
-			});
+				//...success. Establish XML. If params.json, convert JSON respone to XML text then reinitialise
+				.done(function(data) {
+					if (params.json && typeof params.json != 'object') {
+						if (params.jsonCallback) data = params.jsonCallback(data);
+						delete params.fpath;
+						params.xml = json_to_xml(data);
+						return new DataTree(params, subTreeRequest);
+					}
+					if (params.jsonp) data = decodeURIComponent(data).replace(/\{space\}/g, ' ');
+					thiss.xml = data;
+					actOnXML.call(thiss, data, !!subTreeRequest);
+					treeRenderedDfd.resolve();
+				});
+		}
 
 	//from passed string (XML)
 	} else if (typeof params.xml == 'string') {
