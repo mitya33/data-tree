@@ -1,7 +1,7 @@
 /* ==============
 | DATATREE.JS
-| @author: Mitya (acroxall@espresso.co.uk)
-| @Docs & demo: http://www.mitya.co.uk/scripts/XML-Tree---visualise-and-traverse-your-XML-186
+| @author: Mitya (mitya@mitya.uk)
+| @docs: https://mitya.uk/projects/data-tree
 ============== */
 
 DataTree = function(params, subTreeRequest) {
@@ -10,7 +10,7 @@ DataTree = function(params, subTreeRequest) {
 	| PREP & VALIDATION
 	--- */
 
-	const 	thiss = this,
+	let 	thiss = this,
 			treeRenderedDfd = new $.Deferred;
 
 	//ensure was instantiated, not merely called
@@ -25,8 +25,8 @@ DataTree = function(params, subTreeRequest) {
 	else if ((!params.container || !$(params.container).length) && !params.justReturn) error = "no container selector passed or does not match element in DOM";
 	if (error) return debug(error);
 
-	//some vars
-	var	li,
+	//some let s
+	let 	li,
 		appendTo,
 		attrLI,
 		container = $(params.container),
@@ -382,10 +382,12 @@ DataTree = function(params, subTreeRequest) {
 
 		//...build individual XML node. Tags named after object key or, if array, 'node'. Coerce tag name to be valid.
 		function build_node(tag_name, val) {
-			var
-			tag_name = tag_name.replace(/[^\w\-_]/g, '-').replace(/-{2,}/g, '-').replace(/^[^a-z]/, function($0) { return 'node-'+$0; }),
-			padder = new Array(depth + 2).join('\t'),
-			node = '\n'+padder+'<'+tag_name+'>\n'+padder+'\t';
+			tag_name = tag_name
+				.replace(/[^\w\-_]/g, '-')
+				.replace(/-{2,}/g, '-')
+				.replace(/^[^a-z]/, match => 'node-'+match);
+			let padder = new Array(depth + 2).join('\t');
+			let node = '\n'+padder+'<'+tag_name+'>\n'+padder+'\t';
 			if (val) node += typeof val != 'object' ? val : json_to_xml(val, null, depth + 1);
 			return node + '\n'+padder+'</'+tag_name+'>\n';
 		}
